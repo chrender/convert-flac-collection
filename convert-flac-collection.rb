@@ -3,65 +3,6 @@
 # convert-flac-collection
 # christoph endr / ce / christoph-ender.de
 
-# This will convert an entire collection of flac files into AAC-Files in
-# a m4a container. The purpose is to have a set of original files permanently
-# stored in flac-format and to create/update a collection of corresponding
-# m4a files for use in iTunes and/or usage on iOS from iTunes-Sync.
-
-# It was build/tested using the following components:
-# ruby 2.0.0p648 (2015-12-16 revision 53162)
-# fdk-aac v1.5 - https://github.com/mstorsjo/fdk-aac
-# fdkaac v0.6.3 - https://github.com/nu774/fdkaac
-# mp4v2-utils 2.0.0~dfsg0-5 - https://code.google.com/archive/p/mp4v2/
-#  Debian and derivates: apt-get install mp4v2-utils
-
-# You'll need to have an UTF-8 locale active to make tagging work
-# correctly, by doing "export LC_ALL="en_US.utf8" or similar (mp3-only?)
-
-
-# CHANGELOG
-#
-# v0.9.0  2017-12-04 (ce) First usable prototype.
-# v0.9.1  2017-12-04 (ce) Dest now using absolute path, fix comment-dirs.
-# v0.9.2  2017-12-05 (ce) Fix absolute path in comments.
-# v0.9.3  2017-12-06 (ce) Don't create superfluous directory any longer.
-# v0.9.4  2017-12-06 (ce) Use sync-mode for file logging.
-# v0.9.5  2017-12-06 (ce) Use "dir-only" concat in case no disctotal is set. Fix
-#         .               end-of-concat-detection at dir-array end.
-# v0.9.6  2017-12-09 (ce) Close "rawStream" pipes to avoid <defunct> processes.
-# v0.9.7  2017-12-11 (ce) Fix non Audiotheatre-genre detection.
-# v0.9.8  2017-12-12 (ce) Fix compilation-tagging, replace tageditor with
-#         .               mp4art, fix "waitpid"-calls, fix sourcefile date
-#         .               evaluation to avoid unnecessary rebuilds.
-# v0.9.9  2017-12-13 (ce) Fix only-last-disc in concat-files.
-# v0.9.10 2017-12-14 (ce) Hotfix for parameter quotes.
-# v0.9.11 2017-12-17 (ce) Make mono source files work, fix corrupt output
-#         .               files by waiting correctly for fdkaac to finished
-#         .               before running ap4art.
-# v0.9.12 2018-01-03 (ce) Un-use .m4b, add missing genres for audiobooks and
-#         .               audiotheatre, implement variable sample rate, add
-#         .               m4a-optimization, set output-dir and tmp-dir
-#         .               automatically, verify-step now optional.
-# v0.9.13 2018-01-06 (ce) Use VBR instead of CBR by default.
-# v0.9.14 2018-01-17 (ce) Add warning when concatAllDiscsFound is overriden
-#         .               due to DiscTotal setting.
-# v0.9.15 2018-01-28 (ce) Adapted "prefixToProcess" into array.
-# v0.9.16 2018-02-06 (ce) Fixed missing sample rate evaluation.
-# v1.0.0  2018-09-11 (ce) Renamed "process-audio" to "convert-flac-collection".
-
-
-
-#   TODO
-#
-# - Detect non-ASCII filesames.
-# - Eliminate --composer "".
-# - flac-code: Test whether output is really S16little at 44100Hz.
-# - Quote commandline-" quoten everywhere, see title-gsub.
-# - Maybe test whether numberOfChannels, frequenz or S16l-format change during concat.
-# - Avoid ._filename.flac files. "dot-unerscore"-Files are created automatically by macOS.
-#   https://apple.stackexchange.com/questions/14980/why-are-dot-underscore-files-created-and-how-can-i-avoid-them
-# - Test whether cover exists at all.
-
 
 
 require 'find'
@@ -70,7 +11,7 @@ require 'fileutils'
 require 'open3'
 require 'date'
 
-version = "1.0.0"
+version = "1.0.1"
 
 #fdkaacSettingsAudiobook = "-p 5 -b 40000"
 fdkaacSettingsAudiobook = "-p 5 -m 1"
@@ -139,12 +80,12 @@ fdkaacSettingsMusic = "-p 5 -m 2"
 
 
 # Prefixes to process in Audio directory:
-prefixesToProcess = [ "Audiotheatre-", "Audiobooks-", "Music-" ]
+#prefixesToProcess = [ "Audiotheatre-", "Audiobooks-", "Music-" ]
 
 # Process only one to speed things up:
-#prefixesToProcess = [ "Audiotheatre-" ]
 #prefixesToProcess = [ "Audiobooks-" ]
-#prefixesToProcess = [ "Music-" ]
+#prefixesToProcess = [ "Audiotheatre-" ]
+prefixesToProcess = [ "Music-" ]
 
 
 def getTimestamp()
@@ -592,13 +533,16 @@ iterations.each { |workType|
           fileList.each_with_index do |filename, filenameIndex|
             basename = File.basename filename,'.flac'
             numberOfChannels = Integer(`metaflac --show-channels "#{filename}"`, 10)
-            bitsPerSample = Integer(`metaflac --show-bps "#{fileList[0]}"`, 10)
-            sampleRate = Integer(`metaflac --show-sample-rate "#{fileList[0]}"`, 10)
+            bitsPerSample = Integer(`metaflac --show-bps "#{filename}"`, 10)
+            sampleRate = Integer(`metaflac --show-sample-rate "#{filename}"`, 10)
+            log "Processing \"#{basename}\"."
             log "Number of channels: #{numberOfChannels}."
             if numberOfChannels != 1 && numberOfChannels != 2
               log "Invalid number of channels."
               exit
             end
+            log "Bits per sample: #{bitsPerSample}."
+            log "Samplerate: #{sampleRate}."
             # In case we're not concattenating we've got to evaluate all
             # relevant information for every single source file.
             suffix = nil
