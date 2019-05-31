@@ -80,12 +80,12 @@ fdkaacSettingsMusic = "-p 5 -m 2"
 
 
 # Prefixes to process in Audio directory:
-#prefixesToProcess = [ "Audiotheatre-", "Audiobooks-", "Music-" ]
+prefixesToProcess = [ "Audiotheatre-", "Audiobooks-", "Music-" ]
 
 # Process only one to speed things up:
 #prefixesToProcess = [ "Audiobooks-" ]
 #prefixesToProcess = [ "Audiotheatre-" ]
-prefixesToProcess = [ "Music-" ]
+#prefixesToProcess = [ "Music-" ]
 
 
 def getTimestamp()
