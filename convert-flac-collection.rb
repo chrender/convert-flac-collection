@@ -11,7 +11,7 @@ require 'fileutils'
 require 'open3'
 require 'date'
 
-version = "1.0.1"
+version = "1.0.2"
 
 #fdkaacSettingsAudiobook = "-p 5 -b 40000"
 fdkaacSettingsAudiobook = "-p 5 -m 1"
@@ -21,14 +21,15 @@ fdkaacSettingsAudiotheatre = "-p 5 -m 1"
 
 #fdkaacSettingsMusic = "-p 2 -b 128000"
 #fdkaacSettingsMusic = "-p 2 -m 4" # is about 128k
-fdkaacSettingsMusic = "-p 5 -m 2"
+#fdkaacSettingsMusic = "-p 5 -m 3"
+fdkaacSettingsMusic = "-p 5 -m 5"
 
 # -p <param>:
-#  2   AAC-LC  "AAC Profile" MPEG-2 Low-complexity (LC) combined with
+#  2   AAC-LC "AAC Profile" MPEG-2 Low-complexity (LC) combined with
 #      MPEG-4 Perceptual Noise Substitution (PNS)
-#  5   HE-AAC  AAC LC + SBR (Spectral Band Replication)
-# 29   HE-AAC v2       AAC LC + SBR + PS (Parametric Stereo)
-# 23   AAC-LD  "Low Delay Profile" used for real-time communication
+#  5   HE-AAC AAC LC + SBR (Spectral Band Replication)
+# 29   HE-AAC v2 AAC LC + SBR + PS (Parametric Stereo)
+# 23   AAC-LD "Low Delay Profile" used for real-time communication
 # 39   AAC-ELD Enhanced Low Delay
 
 # -b <param>: CBR bitrate, default 64000.
@@ -192,7 +193,8 @@ audioDir = getParentDir scriptDir
 audioParentDir = getParentDir audioDir
 logDir = "#{audioDir}/logs"
 tmpBaseName = "#{audioDir}/tmp"
-destname = "#{audioParentDir}/Audio-Dist-aac"
+#destname = "#{audioParentDir}/Audio-Dist-aac"
+destname = "#{audioParentDir}/../../ce-media-01/Audio-Dist-aac"
 
 
 $logFile = open("#{logDir}/convertflaccollection-#{DateTime.now.strftime "%Y-%m-%d-%H-%M-%S"}.txt", "w")
@@ -695,6 +697,7 @@ iterations.each { |workType|
 }
 
 logEmptyLine
+log "Number of superfluous files: #{alreadyExistingOutputFiles.size}."
 alreadyExistingOutputFiles.each do |filename|
   log "Superfluous file: #{filename}."
 end
